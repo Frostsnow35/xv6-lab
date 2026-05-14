@@ -68,6 +68,24 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+    if(which_dev == 2) {
+      struct proc *p = myproc();
+
+      // alarm 处理
+      if(p->alarm_interval != 0) {
+        p->ticks_count++;
+        if(p->ticks_count >= p->alarm_interval && p->alarm_active == 0) {
+          // 保存完整的trapframe，以便sigreturn恢复
+          memmove(&p->saved_trapframe, p->trapframe, sizeof(struct trapframe));
+          // 修改返回地质为用户处理函数
+          p->trapframe->epc = (uint64)p->alarm_handler;
+          p->ticks_count = 0;
+          p->alarm_active = 1;
+        }
+      }
+
+      yield();
+    }
   } else if((r_scause() == 15 || r_scause() == 13) &&
             vmfault(p->pagetable, r_stval(), (r_scause() == 13)? 1 : 0) != 0) {
     // page fault on lazily-allocated page

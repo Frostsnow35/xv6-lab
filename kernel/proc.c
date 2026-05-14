@@ -140,6 +140,12 @@ found:
     return 0;
   }
 
+  p->alarm_interval = 0;
+  p->alarm_handler = 0;
+  p->ticks_count = 0;
+  p->alarm_active = 0;
+  memset(&p->saved_trapframe, 0, sizeof(p->saved_trapframe));
+
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));

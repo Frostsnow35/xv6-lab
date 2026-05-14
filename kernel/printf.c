@@ -144,6 +144,20 @@ panic(char *s)
     ;
 }
 
+void backtrace(void){
+  uint64 fp = r_fp();
+  uint64 stack_top = PGROUNDUP(fp);          //当前栈所在的页面顶部
+  uint64 stack_bottom = stack_top - PGSIZE;  //底部
+
+  printf("backtrace:\n");
+  while (fp >= stack_bottom && fp < stack_top) {
+    uint64 ret_addr = *(uint64*)(fp - 8);
+    printf("%p\n", (void*)ret_addr);
+
+    fp = *(uint64*)(fp -16);
+  }
+}
+
 void
 printfinit(void)
 {
